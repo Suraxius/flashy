@@ -1,0 +1,103 @@
+body {
+    margin: 0px auto;
+    padding: 0px;
+    background-color: #83bdfc;
+    font-size: 14px;
+    max-width: 600px;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+    display: block;
+    border-radius: 15px;
+}
+
+input, select {
+    margin: 0 0 20px 0;
+    padding: 10px;
+    border-radius: 15px;
+    border: none;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.box_view {
+    margin: 0;
+    padding: 10px 10px 50px 10px;
+
+}
+
+.box_view ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.box_view li {
+    margin: 20px 0;
+    padding: 0;
+    
+}
+
+.box_view ul li a {
+    padding: 10px;
+    margin: 0;
+    background-color: #b4d8ff;
+    text-align: center;
+}
+
+.box_view ul li a.selected {
+    background-color: #202020;
+    color: #EEEEEE;
+}
+
+.box_view li a:hover {
+    background-color: #202020;
+    color: #EEEEEE;
+}
+
+.test_view {
+    margin: 0;
+    padding: 10px 10px 35px 10px;
+}
+
+.std_row, .btn_row {
+    margin: 0 0 20px 0;
+    padding: 10px;
+    min-height: 14px;
+    border-radius: 15px;
+    background-color: #b4d8ff;
+    text-align: center;
+}
+
+.btn_row.selected {
+    background-color: #202020;
+    color: #EEEEEE;
+}
+
+.btn_row:hover {
+    background-color: #202020;
+    color: #EEEEEE;
+}
+
+.configurator_view {
+    padding: 10px 10px 25px 10px;
+}
+
+.configurator_view select {
+    background-color: #FFFFFF;
+}
+/*
+.infos {
+    margin: 0;
+    padding: 10px;
+    background-color: #83bdfc;
+}
+
+.infos div {
+    margin: 20px 0;
+    padding: 0px;
+}
+*/

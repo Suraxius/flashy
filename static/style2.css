@@ -1,0 +1,84 @@
+body {
+    margin: 0px;
+    padding: 0px;
+    color: #EEEEEE;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+input, select {
+    margin: 0;
+    margin-bottom: 20px;
+    padding: 0px 15px;
+    height: 40px;
+    border-radius: 5px;
+    border: none;
+    width: 100%;
+    /*width: inherit;*/
+    box-sizing: border-box;
+}
+
+.box_view {
+    margin: 0px;
+    padding: 0px;
+    width: 100%;
+    background-color: #505050;
+}
+
+.box_view #head {
+    font-weight: bold;
+}
+
+.box_view tr {
+    padding: 15px 10px;
+}
+
+.box_view td {
+    padding: inherit;
+}
+
+.test_input {
+    background-color: #505050;
+    margin: 0;
+    padding: 10px;
+}
+
+.test_input form {
+    margin: 0;
+    padding: 0;
+}
+
+.test_input div {
+    margin: 0;
+    /*margin-bottom: 20px;*/
+    padding: 0;
+    min-height: 40px;
+    width: 100%;
+}
+
+.test_input #feedback {
+    margin: auto;
+    padding: 15px;
+    width: fit-content;
+    text-align: center;
+    line-height: 25px;
+}
+
+.configurator_input {
+    background-color: #3f3f3f;
+    padding: 10px 10px;
+}
+
+.infos {
+    margin: 0;
+    padding: 10px;
+    background-color: #3f3f3f;
+}
+
+.infos div {
+    margin: 20px 0;
+    padding: 0px;
+}
