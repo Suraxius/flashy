@@ -64,11 +64,19 @@ class DB {
         return $this->db->query("SELECT * FROM boxes");
     }
 
-    public function getBoxNameByID($boxID) {
+    public function getBoxNameByBoxID($boxID) {
         return $this->db->query("SELECT name FROM boxes WHERE id='".$boxID."' LIMIT 1")->fetchColumn();
     }
 
-    public function getClassNameByID($classID) {
+    public function getNewBoxIDOnCorrectByBoxID($boxID) {
+        return $this->db->query("SELECT class_id_on_correct FROM boxes WHERE id='".$boxID."' LIMIT 1")->fetchColumn();
+    }
+
+    public function getNewBoxIDOnIncorrectByBoxID($boxID) {
+        return $this->db->query("SELECT class_id_on_incorrect FROM boxes WHERE id='".$boxID."' LIMIT 1")->fetchColumn();
+    }
+
+    public function getClassNameByClassID($classID) {
         return $this->db->query("SELECT name FROM classes WHERE id='".$classID."' LIMIT 1")->fetchColumn();
     }
 
@@ -87,7 +95,7 @@ class DB {
         }
     }
 
-    public function getCardByID($card_id) {
+    public function getCardByCardID($card_id) {
         $res = $this->db->query("SELECT * FROM cards WHERE id = '" . $card_id . "' LIMIT 1")->fetchAll();
         if (count($res) > 0) {
             $row = $res[0];
@@ -107,7 +115,7 @@ class DB {
     }
 
     public function updateCard($card) {
-        $origCard = $this->getCardByID($card->id);
+        $origCard = $this->getCardByCardID($card->id);
         if($origCard->boxID != $card->boxID) {
             $res = $this->db->query("UPDATE cards SET box_id='".$card->boxID."' WHERE id='".$card->id."'");
         }
@@ -157,7 +165,7 @@ class App {
             /*
             if($this->selectedCard != null) {
                 // Give the user some info...
-                $this->message = $this->selectedCard->front.' | '.$this->db->getClassNameByID($this->selectedCard->classID);
+                $this->message = $this->selectedCard->front.' | '.$this->db->getClassNameByClassID($this->selectedCard->classID);
             }
             */
         }
@@ -180,25 +188,30 @@ class App {
                     $this->message = 'Correct';
                 }
                 else {
-                    $this->message = 'Almost Correct';
+                    $this->message = 'Correct spelling but wrong upper/lower case';
                 }
-                
+                /*
                 if($this->selectedCard->boxID >= 0 && $this->selectedCard->boxID < 3) {
                     $this->selectedCard->boxID = 4;
                 }
                 else if($this->selectedCard->boxID >= 3 && $this->selectedCard->boxID < $this->db->getNumBoxes()-1) {
                     $this->selectedCard->boxID += 1;
                 }
+                */
+                $this->selectedCard->boxID = $this->db->getNewBoxIDOnCorrectByBoxID($this->selectedCard->boxID);
             }
             //Answer wrong:
             else {
                 $this->message = 'Wrong - Correct answer:<br>'.$this->selectedCard->back;
+                /*
                 if($this->selectedCard->boxID > 0 && $this->selectedCard->boxID <= 3) {
                     $this->selectedCard->boxID -= 1;
                 }
                 else if($this->selectedCard->boxID > 3 && $this->selectedCard->boxID < $this->db->getNumBoxes()) {
                     $this->selectedCard->boxID = 2;
                 }
+                */
+                $this->selectedCard->boxID = $this->db->getNewBoxIDOnIncorrectByBoxID($this->selectedCard->boxID);
             }
             $this->db->updateCard($this->selectedCard);
             $this->testInput = '';
@@ -213,7 +226,7 @@ class App {
     private function renderTest() {
         echo '<div class="test_view">' . "\n";
         echo '<div class="std_row">' . $this->message . "</div>\n";
-        echo '<div class="std_row">'.($this->selectedCard == null ? '' : $this->selectedCard->front.' | '.$this->db->getClassNameByID($this->selectedCard->classID))."</div>\n";
+        echo '<div class="std_row">'.($this->selectedCard == null ? '' : $this->selectedCard->front.' | '.$this->db->getClassNameByClassID($this->selectedCard->classID))."</div>\n";
         echo '<form method="POST">' . "\n";
         echo '<input type="text" name="test_input"'
         .($this->testInput == null ? '' : ' value="' . $this->testInput . '"')
@@ -281,7 +294,7 @@ class App {
         if (isset($_REQUEST['card_id']) &&
             $_REQUEST['card_id'] >= 0)
             {
-            $this->selectedCard = $this->db->getCardByID($_REQUEST['card_id']);
+            $this->selectedCard = $this->db->getCardByCardID($_REQUEST['card_id']);
         }
         if (isset($_REQUEST['check_case']) &&
             $_REQUEST['check_case'] == 1)
@@ -313,7 +326,7 @@ class App {
                 $card = new Card($this->selectedCard->id, $this->selectedCard->boxID, $_REQUEST['class_id'], trim($_REQUEST['card_front']), trim($_REQUEST['card_back']));
                 $this->db->updateCard($card);
                 // Reload the updated card
-                $this->selectedCard = $this->db->getCardByID($card->id);
+                $this->selectedCard = $this->db->getCardByCardID($card->id);
         }
         // Delete a card from the database
         else if (isset($_REQUEST['action_delete']) &&

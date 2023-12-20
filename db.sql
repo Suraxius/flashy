@@ -2,16 +2,20 @@ PRAGMA foreign_keys=OFF;
 BEGIN TRANSACTION;
 CREATE TABLE boxes (
     id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL
+    name TEXT NOT NULL,
+    class_id_on_correct INTEGER NOT NULL, 
+    class_id_on_incorrect INTEGER NOT NULL,
+    FOREIGN KEY(class_id_on_correct) REFERENCES boxes(id) ON UPDATE CASCADE,
+    FOREIGN KEY(class_id_on_incorrect) REFERENCES boxes(id) ON UPDATE CASCADE
 );
-INSERT INTO boxes VALUES(0,'Failed Thrice');
-INSERT INTO boxes VALUES(1,'Failed Twice');
-INSERT INTO boxes VALUES(2,'Failed Once');
-INSERT INTO boxes VALUES(3,'New');
-INSERT INTO boxes VALUES(4,'Correct Once');
-INSERT INTO boxes VALUES(5,'Correct Twice');
-INSERT INTO boxes VALUES(6,'Correct Thrice');
-INSERT INTO boxes VALUES(7,'Mastered');
+INSERT INTO boxes VALUES(0,'Failed Thrice',4,0);
+INSERT INTO boxes VALUES(1,'Failed Twice',4,0);
+INSERT INTO boxes VALUES(2,'Failed Once',4,1);
+INSERT INTO boxes VALUES(3,'New',4,2);
+INSERT INTO boxes VALUES(4,'Correct Once',5,2);
+INSERT INTO boxes VALUES(5,'Correct Twice',6,2);
+INSERT INTO boxes VALUES(6,'Correct Thrice',7,2);
+INSERT INTO boxes VALUES(7,'Mastered',7,2);
 CREATE TABLE classes (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL
