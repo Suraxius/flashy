@@ -23,7 +23,7 @@ I wrote this small application to help my wife learn german but then thought of 
 
 ## Requirements
 
-- php 7.4 or higher
+- php 7.0 or higher
 - php-sqlite3 extension
 
 ## Installation
