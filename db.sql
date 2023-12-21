@@ -1,5 +1,13 @@
 PRAGMA foreign_keys=OFF;
 BEGIN TRANSACTION;
+CREATE TABLE config (
+    id INTEGER PRIMARY KEY,
+    key TEXT NOT NULL,
+    value TEXT NOT NULL
+);
+INSERT INTO config VALUES(0,'NEW_CARD_BOX_ID','4');
+INSERT INTO config VALUES(1,'USERNAME','username');
+INSERT INTO config VALUES(2,'PASSWORD','password');
 CREATE TABLE boxes (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
@@ -140,4 +148,6 @@ INSERT INTO cards VALUES(100,4,9,'at (time)','um');
 INSERT INTO cards VALUES(101,4,2,'to lie (telling untruth)','lügen');
 INSERT INTO cards VALUES(102,4,2,'to take (time)','dauert');
 INSERT INTO cards VALUES(103,4,1,'admission','Eintritt');
+INSERT INTO cards VALUES(104,4,0,'the change','die Änderung');
+INSERT INTO cards VALUES(105,4,0,'to change','ändern');
 COMMIT;

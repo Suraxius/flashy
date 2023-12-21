@@ -32,17 +32,13 @@ Create a database from the provided db.sql file:
 sqlite db.db < db.sql
 ```
 
-## Edit index.php
-Find following user/password lines and edit as needed.
-```
-class Auth {
-    private $user = 'username';
-    private $pass = 'password';
-```
+### Change the username/password
+Find the USERNAME/PASSWORD rows in the config table inside the database and edit as needed.
 
 You can also comment out the line
 
 ```
-new Auth();
+new Auth($db);
 ```
-at the bottom to disable basic authentication completely.
+at the bottom of index.php to disable basic authentication completely.
+

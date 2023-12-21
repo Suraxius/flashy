@@ -12,10 +12,12 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 class Auth {
-    private $user = 'username';
-    private $pass = 'password';
+    private $db, $user, $pass;
 
-    public function __construct() {
+    public function __construct($db) {
+        $this->db = $db;
+        $this->user = $db->getConfigValueByKey('USERNAME');
+        $this->pass = $db->getConfigValueByKey('PASSWORD');
         if (!isset($_SERVER['PHP_AUTH_USER']) ||
             $_SERVER['PHP_AUTH_USER'] != $this->user ||
             !isset($_SERVER['PHP_AUTH_PW']) ||
@@ -62,6 +64,12 @@ class DB {
 
     public function getBoxes() {
         return $this->db->query("SELECT * FROM boxes");
+    }
+
+    public function getConfigValueByKey($key) {
+        $query = $this->db->prepare("SELECT value FROM config where key=?");
+        $query->execute([$key]);
+        return $query->fetchColumn();
     }
 
     public function getBoxNameByBoxID($boxID) {
@@ -142,8 +150,8 @@ class DB {
 
     public function createCard($card) {
         if($card->classID != null && $card->front != null && $card->back != null) {
-            $this->db->prepare("INSERT INTO cards (box_id,class_id,front,back) VALUES(3,?,?,?)")
-                ->execute([$card->classID, $card->front, $card->back]);
+            $this->db->prepare("INSERT INTO cards (box_id,class_id,front,back) VALUES(?,?,?,?)")
+                ->execute([$card->boxID, $card->classID, $card->front, $card->back]);
         }
     }
 
@@ -165,11 +173,33 @@ class App {
     $message,
     $checkCase = true;
 
-    public function __construct() {
-        $this->db = new DB();
+    public function __construct($db) {
+        $this->db = $db;
+        $this->handleAllInput();
+        $this->selectCardIfBoxSelected();
+        $this->runTestIfUserInput();
+        $this->renderTest();
+        $this->renderBoxes();
+        $this->renderEditor();
+    }
 
-        $this->handleInput();
+    private function renderTest() {
+        echo '<div class="test_view">' . "\n";
+        echo '<div class="std_row">' . $this->message . "</div>\n";
+        echo '<div class="std_row">'.($this->selectedCard == null ? '' : $this->selectedCard->front.' | '.$this->db->getClassNameByClassID($this->selectedCard->classID))."</div>\n";
+        echo '<form method="POST">' . "\n";
+        echo '<input type="text" name="test_input" autocomplete="off"'
+        .($this->testInput == null ? '' : ' value="' . $this->testInput . '"')
+        .($this->selectedCard == null ? '' : ' autofocus')
+        .'>'."\n";
+        echo '<input class="btn_row" type="submit" value="Check">' . "\n";
+        echo '<input type="hidden" name="card_id" value="'.($this->selectedCard == null ? '' : $this->selectedCard->id).'">'."\n";
+        echo '</form>' . "\n";
+        echo '<a class="btn_row'.($this->checkCase ? ' selected' : '').'" href="'.$this->createExtendedGetParameterString('check_case', (int)!$this->checkCase).'">Case sensitive</a>' . "\n";
+        echo "</div>\n";
+    }
 
+    private function selectCardIfBoxSelected() {
         // Select random card from selected box since none is selected yet:
         if($this->selectedBoxID != null && $this->selectedCard == null) {
             $this->selectNewCard();
@@ -180,18 +210,31 @@ class App {
             }
             */
         }
+    }
 
+    private function runTestIfUserInput() {
         // Do some evaluation...
         if(isset($this->selectedCard) && $this->testInput != null) {
-            // Case sensitive...
-            if($this->checkCase) {
-                $a = $this->selectedCard->back;
-                $b = $this->testInput;
-            }
+            // Copy values to be mangled :)
+            $a = $this->selectedCard->back;
+            $b = $this->testInput;
+            // Normalize Umlauts
+            $umlauts = array(
+            "ä"=>"ae",
+            "Ä"=>"Ae",
+            "ö"=>"oe",
+            "Ö"=>"Oe",
+            "ü"=>"ue",
+            "Ü"=>"Ue",
+            "ß"=>"ss",
+            "ẞ"=>"Ss"
+            );
+            $a = str_replace(array_keys($umlauts), array_values($umlauts), $a);
+            $b = str_replace(array_keys($umlauts), array_values($umlauts), $b);
             // Case insensitive...
-            else {
-                $a = strtolower($this->selectedCard->back);
-                $b = strtolower($this->testInput);
+            if(!$this->checkCase) {
+                $a = strtolower($a);
+                $b = strtolower($b);
             }
             //Answer correct:
             if($a == $b) {
@@ -224,30 +267,13 @@ class App {
                 */
                 $this->selectedCard->boxID = $this->db->getNewBoxIDOnIncorrectByBoxID($this->selectedCard->boxID);
             }
+            // Flush box_id update to database
             $this->db->updateCard($this->selectedCard);
+            // Clear the input field
             $this->testInput = '';
+            // select the next card for the new round
             $this->selectNewCard();
         }
-    
-        $this->renderTest();
-        $this->renderBoxes();
-        $this->renderConfigurator();
-    }
-
-    private function renderTest() {
-        echo '<div class="test_view">' . "\n";
-        echo '<div class="std_row">' . $this->message . "</div>\n";
-        echo '<div class="std_row">'.($this->selectedCard == null ? '' : $this->selectedCard->front.' | '.$this->db->getClassNameByClassID($this->selectedCard->classID))."</div>\n";
-        echo '<form method="POST">' . "\n";
-        echo '<input type="text" name="test_input" autocomplete="off"'
-        .($this->testInput == null ? '' : ' value="' . $this->testInput . '"')
-        .($this->selectedCard == null ? '' : ' autofocus')
-        .'>'."\n";
-        echo '<input class="btn_row" type="submit" value="Check">' . "\n";
-        echo '<input type="hidden" name="card_id" value="'.($this->selectedCard == null ? '' : $this->selectedCard->id).'">'."\n";
-        echo '</form>' . "\n";
-        echo '<a class="btn_row'.($this->checkCase ? ' selected' : '').'" href="'.$this->createExtendedGetParameterString('check_case', (int)!$this->checkCase).'">Case sensitive</a>' . "\n";
-        echo "</div>\n";
     }
 
     private function renderBoxes() {
@@ -271,8 +297,8 @@ class App {
         echo "</div>\n";
     }
 
-    private function renderConfigurator() {
-        echo '<div class="configurator_view">' . "\n";
+    private function renderEditor() {
+        echo '<div class="editor_view">' . "\n";
         echo '<form method="POST">' . "\n";
         echo '<div><input type="text" name="card_front" value="'.($this->selectedCard != null ? $this->selectedCard->front : 'Front').'"></div>' . "\n";
         echo '<div><input type="text" name="card_back" value="'. ($this->selectedCard != null ? $this->selectedCard->back  : 'Back') .'"></div>' . "\n";
@@ -295,7 +321,7 @@ class App {
         echo "</div>\n";
     }
 
-    private function handleInput() {
+    private function handleAllInput() {
         if (isset($_REQUEST['box_id']) &&
             $_REQUEST['box_id'] >= 0 &&
             $_REQUEST['box_id'] < $this->db->getNumBoxes())
@@ -324,7 +350,7 @@ class App {
             isset($_REQUEST['card_front']) && $_REQUEST['card_front'] != null &&
             isset($_REQUEST['card_back']) && $_REQUEST['card_back'] != null)
             {
-                $card = new Card(null, 3, $_REQUEST['class_id'], trim($_REQUEST['card_front']), trim($_REQUEST['card_back']));
+                $card = new Card(null, (int)$this->db->getConfigValueByKey('NEW_CARD_BOX_ID'), $_REQUEST['class_id'], trim($_REQUEST['card_front']), trim($_REQUEST['card_back']));
                 $this->db->createCard($card);
         }
         // Modify an existing card in the database
@@ -376,9 +402,9 @@ class App {
         unset($_GET[$key]);
     }        
 }
-
-new Auth();
-new App();
+$db = new DB();
+new Auth($db);
+new App($db);
 ?>
 </body>
 </html>
