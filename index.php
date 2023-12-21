@@ -65,19 +65,27 @@ class DB {
     }
 
     public function getBoxNameByBoxID($boxID) {
-        return $this->db->query("SELECT name FROM boxes WHERE id='".$boxID."' LIMIT 1")->fetchColumn();
+        $query = $this->db->prepare("SELECT name FROM boxes WHERE id=? LIMIT 1");
+        $query->execute([$boxID]);
+        return $query->fetchColumn();
     }
 
     public function getNewBoxIDOnCorrectByBoxID($boxID) {
-        return $this->db->query("SELECT class_id_on_correct FROM boxes WHERE id='".$boxID."' LIMIT 1")->fetchColumn();
+        $query = $this->db->prepare("SELECT class_id_on_correct FROM boxes WHERE id=? LIMIT 1");
+        $query->execute([$boxID]);
+        return $query->fetchColumn();
     }
 
     public function getNewBoxIDOnIncorrectByBoxID($boxID) {
-        return $this->db->query("SELECT class_id_on_incorrect FROM boxes WHERE id='".$boxID."' LIMIT 1")->fetchColumn();
+        $query = $this->db->prepare("SELECT class_id_on_incorrect FROM boxes WHERE id=? LIMIT 1");
+        $query->execute([$boxID]);
+        return $query->fetchColumn();
     }
 
     public function getClassNameByClassID($classID) {
-        return $this->db->query("SELECT name FROM classes WHERE id='".$classID."' LIMIT 1")->fetchColumn();
+        $query = $this->db->prepare("SELECT name FROM classes WHERE id=? LIMIT 1");
+        $query->execute([$classID]);
+        return $query->fetchColumn();
     }
 
     public function getNumBoxes() {
@@ -85,7 +93,9 @@ class DB {
     }
 
     public function getFirstCardByBoxID($boxID) {
-        $res = $this->db->query("SELECT * FROM cards WHERE box_id = '" . $boxID . "' LIMIT 1")->fetchAll();
+        $query = $this->db->prepare("SELECT * FROM cards WHERE box_id=? LIMIT 1");
+        $query->execute([$boxID]);
+        $res = $query->fetchAll();
         if (count($res) > 0) {
             $row = $res[0];
             return Card::createFromDBRow($row);
@@ -117,28 +127,29 @@ class DB {
     public function updateCard($card) {
         $origCard = $this->getCardByCardID($card->id);
         if($origCard->boxID != $card->boxID) {
-            $res = $this->db->query("UPDATE cards SET box_id='".$card->boxID."' WHERE id='".$card->id."'");
+            $this->db->prepare("UPDATE cards SET box_id=? WHERE id=?")->execute([$card->boxID, $card->id]);
         }
         if($origCard->classID != $card->classID) {
-            $res = $this->db->query("UPDATE cards SET class_id='".$card->classID."' WHERE id='".$card->id."'");
+            $this->db->prepare("UPDATE cards SET class_id=? WHERE id=?")->execute([$card->classID, $card->id]);
         }
         if($origCard->front != $card->front) {
-            $res = $this->db->query("UPDATE cards SET front='".$card->front."' WHERE id='".$card->id."'");
+            $this->db->prepare("UPDATE cards SET front=? WHERE id=?")->execute([$card->id]);
         }
         if($origCard->back != $card->back) {
-            $res = $this->db->query("UPDATE cards SET back='".$card->back."' WHERE id='".$card->id."'");
+            $this->db->prepare("UPDATE cards SET back=? WHERE id=?")->execute([$card->back, $card->id]);
         }
     }
 
     public function createCard($card) {
         if($card->classID != null && $card->front != null && $card->back != null) {
-            $res = $this->db->query("INSERT INTO cards (box_id,class_id,front,back) VALUES(3,".$card->classID.",'".$card->front."','".$card->back."')");
+            $this->db->prepare("INSERT INTO cards (box_id,class_id,front,back) VALUES(3,?,?,?)")
+                ->execute([$card->classID, $card->front, $card->back]);
         }
     }
 
     public function deleteCard($cardID) {
         if($cardID != null) {
-            $res = $this->db->query("DELETE FROM cards WHERE id='".$cardID."'");
+            $this->db->prepare("DELETE FROM cards WHERE id=?")->execute([$cardID]);
         }
     }
 
