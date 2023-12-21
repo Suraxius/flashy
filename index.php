@@ -228,7 +228,7 @@ class App {
         echo '<div class="std_row">' . $this->message . "</div>\n";
         echo '<div class="std_row">'.($this->selectedCard == null ? '' : $this->selectedCard->front.' | '.$this->db->getClassNameByClassID($this->selectedCard->classID))."</div>\n";
         echo '<form method="POST">' . "\n";
-        echo '<input type="text" name="test_input"'
+        echo '<input type="text" name="test_input" autocomplete="off"'
         .($this->testInput == null ? '' : ' value="' . $this->testInput . '"')
         .($this->selectedCard == null ? '' : ' autofocus')
         .'>'."\n";
