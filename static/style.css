@@ -82,11 +82,11 @@ input, select {
     color: #EEEEEE;
 }
 
-.configurator_view {
+.editor_view {
     padding: 10px 10px 25px 10px;
 }
 
-.configurator_view select {
+.editor_view select {
     background-color: #FFFFFF;
 }
 /*
