@@ -23,19 +23,35 @@ I wrote this small application to help my wife learn german but then thought of 
 
 ## Requirements
 
-- php 7.0 or higher
+- php 5.0 or higher
 - php-sqlite3 extension
 
 ## Installation
-Create a database from the provided db.sql file:
+1. Set a password for your new user in username.sql. Find following line and replace 'password' by your preferred password.
 ```
-sqlite db.db < db.sql
+INSERT INTO config VALUES(1,'PASSWORD','password');
 ```
 
-### Change the username/password
-Find the USERNAME/PASSWORD rows in the config table inside the database and edit as needed.
+Create a database from the provided username.sql file. Note that the filename without the '.db' determines the login username.
+```
+sqlite yourloginuser.db < username.sql
+```
 
-You can also comment out the line
+
+You can also disable authentication by removing the '//' part of following lines at the bottom of index.php
+```
+//$db = new DB('username.db');
+//new App($db);
+```
+
+And adding '//' to the start of the following lines at the same spot in index.php
+```
+$auth = new Auth();
+new App($auth->getDBHandle());
+```
+
+
+
 
 ```
 new Auth($db);

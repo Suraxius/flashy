@@ -6,8 +6,7 @@ CREATE TABLE config (
     value TEXT NOT NULL
 );
 INSERT INTO config VALUES(0,'NEW_CARD_BOX_ID','4');
-INSERT INTO config VALUES(1,'USERNAME','username');
-INSERT INTO config VALUES(2,'PASSWORD','password');
+INSERT INTO config VALUES(1,'PASSWORD','password');
 CREATE TABLE boxes (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,

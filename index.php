@@ -8,26 +8,45 @@
 </head>
 <body>
 <?php
+// Following 2 lines are for debugging only and may be removed for security.
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 class Auth {
-    private $db, $user, $pass;
+    private $db;
 
-    public function __construct($db) {
-        $this->db = $db;
-        $this->user = $db->getConfigValueByKey('USERNAME');
-        $this->pass = $db->getConfigValueByKey('PASSWORD');
-        if (!isset($_SERVER['PHP_AUTH_USER']) ||
-            $_SERVER['PHP_AUTH_USER'] != $this->user ||
-            !isset($_SERVER['PHP_AUTH_PW']) ||
-            $_SERVER['PHP_AUTH_PW']   != $this->pass
-            ) {
-            header('HTTP/1.0 401 Unauthorized');
-            header('WWW-Authenticate: Basic realm="Flashy"');
-            echo 'You are not authorized to access this site. Please log in.';
-            exit;
+    public function __construct() {
+        if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] === '' ||
+            !isset($_SERVER['PHP_AUTH_PW'])   || $_SERVER['PHP_AUTH_PW']   === '')
+        {
+            $this->respondWithAccessDenied();
         }
+
+        $dbFileName = preg_replace("/[^A-Za-z0-9]/", '', $_SERVER['PHP_AUTH_USER']) . '.db';
+        if(!file_exists($dbFileName)) {
+            $this->respondWithAccessDenied();
+        }
+
+        $this->db = new DB($dbFileName);
+        if($this->db == null) {
+            $this->respondWithAccessDenied();
+        }
+
+        $pass = $this->db->getConfigValueByKey('PASSWORD');
+        if($_SERVER['PHP_AUTH_PW'] !== $pass) {
+            $this->respondWithAccessDenied();
+        }
+    }
+
+    public function getDBHandle() {
+        return $this->db;
+    }
+
+    private function respondWithAccessDenied() {
+        header('HTTP/1.0 401 Unauthorized');
+        header('WWW-Authenticate: Basic realm="Flashy"');
+        echo 'You are not authorized to access this site. Please log in.';
+        exit;
     }
 }
 
@@ -49,13 +68,23 @@ class Card {
 class DB {
     private $db;
 
-    public function __construct() {
-        $this->db = new PDO('sqlite:db.db');
-        $this->db->query("PRAGMA foreign_keys = ON");
+    public function __construct($dbFileName) {
+        try {
+            $this->db = new PDO('sqlite:' . $dbFileName);
+            $this->db->query("PRAGMA foreign_keys = ON");
+        }
+        catch(PDOException $e) {
+            $this->db = null;
+        }
     }
 
     public function __destruct() {
         $db = null;
+    }
+
+    public function databaseIsOpen() {
+        if($this->db != null) return true;
+        else return false;
     }
 
     public function getClasses() {
@@ -174,6 +203,10 @@ class App {
     $checkCase = true;
 
     public function __construct($db) {
+        if($db == null) {
+            echo 'App cannot start without an active database. Good bye!';
+            exit;
+        }
         $this->db = $db;
         $this->handleAllInput();
         $this->selectCardIfBoxSelected();
@@ -402,9 +435,9 @@ class App {
         unset($_GET[$key]);
     }        
 }
-$db = new DB();
-new Auth($db);
-new App($db);
+
+$auth = new Auth();
+new App($auth->getDBHandle());
 ?>
 </body>
 </html>
