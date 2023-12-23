@@ -50,11 +50,3 @@ $auth = new Auth();
 new App($auth->getDBHandle());
 ```
 
-
-
-
-```
-new Auth($db);
-```
-at the bottom of index.php to disable basic authentication completely.
-
