@@ -33,7 +33,7 @@ class Auth {
         }
 
         $pass = $this->db->getConfigValueByKey('PASSWORD');
-        if($_SERVER['PHP_AUTH_PW'] !== $pass) {
+        if(hash('sha256', $_SERVER['PHP_AUTH_PW']) !== $pass) {
             $this->respondWithAccessDenied();
         }
     }
@@ -435,7 +435,8 @@ class App {
         unset($_GET[$key]);
     }        
 }
-
+//$db = new DB('username.db');
+//new App($db);
 $auth = new Auth();
 new App($auth->getDBHandle());
 ?>

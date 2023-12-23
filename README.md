@@ -27,7 +27,7 @@ I wrote this small application to help my wife learn german but then thought of 
 - php-sqlite3 extension
 
 ## Installation
-1. Set a password for your new user in username.sql. Find following line and replace 'password' by your preferred password.
+1. Set a password for your new user in username.sql. Find following line and replace '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8' by the sha256 hash of your preferred password.
 ```
 INSERT INTO config VALUES(1,'PASSWORD','password');
 ```
